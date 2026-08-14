@@ -25,6 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
+          cache-disabled: true
 
       - name: Prepare Secrets and Keystore
         env:
@@ -44,7 +45,7 @@ jobs:
             echo "Keystore decoded successfully."
           fi
 
-      - name: Build Debug APK
+      - name: Build APKs
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           CM_KEYSTORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
@@ -54,21 +55,10 @@ jobs:
           KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
         run: |
-          gradle assembleDebug --no-daemon --stacktrace
+          gradle assembleDebug --no-daemon --no-configuration-cache -Dorg.gradle.configuration-cache=false --stacktrace
 
-      - name: Build Release APK
-        if: success()
-        env:
-          KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
-          CM_KEYSTORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
-          CM_KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
-          CM_KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
-        run: |
           if [ -f "release.keystore" ]; then
-            gradle assembleRelease --no-daemon --stacktrace || echo "Release build skipped or fallback to debug"
+            gradle assembleRelease --no-daemon --no-configuration-cache -Dorg.gradle.configuration-cache=false --stacktrace || echo "Release signing fallback"
           fi
 
       - name: Upload Debug APK
