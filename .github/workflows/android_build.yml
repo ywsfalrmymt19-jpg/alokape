@@ -72,7 +72,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
         run: |
-          gradle assemble --no-daemon --no-configuration-cache -Dorg.gradle.configuration-cache=false --stacktrace
+          gradle assembleDebug assembleRelease --no-daemon --no-configuration-cache -Dorg.gradle.configuration-cache=false -Dksp.incremental=false --stacktrace
 
       - name: Upload Debug APK
         if: always()
