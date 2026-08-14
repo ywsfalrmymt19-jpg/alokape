@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">تطبيق العكابي المحاسبي</string>
+    <string name="app_subtitle">Al-Okabi Accounting App</string>
+    <string name="programmer_title">برمجة د/ مالك الهيمة</string>
+    <string name="programmer_details">تصميم وبرمجة د/ مالك الهيمة</string>
+    <string name="programmer_phone">771134103</string>
+    <string name="user_name">يوسف</string>
+    <string name="user_title">صورة باسم يوسف</string>
+    <string name="reports">التقارير</string>
+    <string name="daily_income">الدخل اليومي</string>
+    <string name="daily_expenses">الخرجيات اليومي</string>
+    <string name="total_hours">إجمالي عدد الساعات</string>
+    <string name="work_type">نوع العمل</string>
+    <string name="total_amount">إجمالي المبلغ</string>
+    <string name="expense_type">نوع الخرج</string>
+    <string name="expense_amount">مبلغ الخرج</string>
+    <string name="weekly_report">اسبوعي</string>
+    <string name="monthly_report">شهري</string>
+    <string name="yearly_report">سنوي</string>
+    <string name="auto_saved_badge">تم الحفظ التلقائي على الهاتف</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "تطبيق العكابي المحاسبي",
+  "description": "تطبيق العكابي المحاسبي لإدارة الدخل اليومي والخرجيات والتقارير المالية مع الحفظ التلقائي على الهاتف",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

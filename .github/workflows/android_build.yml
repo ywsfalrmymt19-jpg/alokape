@@ -1,0 +1,71 @@
+name: Build Android APK
+ 
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Prepare Secrets and Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # Create .env file for secrets plugin if GEMINI_API_KEY exists
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env
+          fi
+
+          # Decode keystore if KEYSTORE_BASE64 secret exists
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
+            echo "Keystore decoded successfully."
+          fi
+
+      - name: Build APKs with Gradle
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
+          CM_KEYSTORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
+          CM_KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
+          CM_KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
+        run: |
+          # Build both debug and release
+          ./gradlew assembleDebug --stacktrace
+          if [ -f "release.keystore" ]; then
+            ./gradlew assembleRelease --stacktrace || true
+          fi
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlOkabi-Accounting-Debug-APK
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Release APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlOkabi-Accounting-Release-APK
+          path: app/build/outputs/apk/release/*.apk
