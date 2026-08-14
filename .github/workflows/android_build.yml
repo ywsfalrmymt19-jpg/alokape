@@ -1,5 +1,5 @@
 name: Build Android APK
- 
+
 on:
   push:
     branches: [ "main", "master" ]
@@ -23,6 +23,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
 
       - name: Prepare Secrets and Keystore
         env:
@@ -42,7 +44,7 @@ jobs:
             echo "Keystore decoded successfully."
           fi
 
-      - name: Build APKs with Gradle
+      - name: Build Debug APK
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           CM_KEYSTORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
@@ -52,19 +54,21 @@ jobs:
           KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
         run: |
-          # Use gradle command directly or gradlew if present
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            GRADLE_CMD="./gradlew"
-          else
-            GRADLE_CMD="gradle"
-          fi
+          gradle assembleDebug --no-daemon --no-configuration-cache --stacktrace
 
-          echo "Using command: $GRADLE_CMD"
-          $GRADLE_CMD assembleDebug --stacktrace
-
+      - name: Build Release APK
+        if: success()
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
+          CM_KEYSTORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
+          CM_KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
+          CM_KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.CM_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.CM_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.CM_KEY_PASSWORD }}
+        run: |
           if [ -f "release.keystore" ]; then
-            $GRADLE_CMD assembleRelease --stacktrace || echo "Release build skipped or failed"
+            gradle assembleRelease --no-daemon --no-configuration-cache --stacktrace || echo "Release build skipped or failed"
           fi
 
       - name: Upload Debug APK
